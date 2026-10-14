@@ -1,0 +1,132 @@
+module washing_machine(
+ input clk,
+ input rst,
+ input start,
+ input water_fill,
+ input wash_done,
+ input rinse_done,
+ input spin_done,
+ 
+ output reg fill_water,
+ output reg wash_motor,
+ output reg rinse_motor,
+ output reg spin_motor,
+ output reg done
+    );
+   
+   parameter IDLE=3'b000,
+   FILL=3'b001,
+   WASH=3'b010,
+   RINSE=3'b011,
+   SPIN=3'b100,
+   DONE=3'b101;
+   reg[2:0]current_state,next_state;
+   
+   always@(posedge clk or posedge rst)
+   begin
+    if(rst)
+     current_state<=IDLE;
+    else 
+     current_state<=next_state;
+    end
+   
+   always@(*)
+    begin
+    case(current_state)
+    IDLE:
+     begin
+     if(start)
+      next_state=FILL;
+     else
+      next_state=IDLE;
+     end
+     
+     FILL:
+     begin
+      if(water_fill)
+       next_state=WASH;
+      else
+       next_state=FILL;
+      end
+      
+      WASH:
+      begin
+       if(wash_done)
+        next_state=RINSE;
+       else
+        next_state=WASH;
+       end
+       
+       RINSE:
+       begin
+       if(rinse_done)
+        next_state=SPIN;
+       else
+        next_state=RINSE;
+       end
+       
+       SPIN:
+       begin
+       if(spin_done)
+        next_state=DONE;
+       else
+        next_state=SPIN;
+      end
+       
+       DONE:
+       begin
+        next_state=IDLE;
+       end 
+       
+       default:
+        next_state=IDLE;
+       endcase
+       end
+       
+     //output
+      always@(*)
+      begin
+      fill_water=0;
+      wash_motor=0;
+      rinse_motor=0;
+      spin_motor=0;
+      done=0;
+   
+   case(current_state)
+   IDLE:
+    begin
+    fill_water=1;
+    wash_motor=1;
+    rinse_motor=1;
+    spin_motor=1;
+    done=1;
+   end
+   
+   FILL:
+    begin
+     fill_water=1;
+    end
+    
+   WASH:
+    begin
+     wash_motor=1;
+    end
+    
+   RINSE:
+     begin
+      rinse_motor=1;
+     end
+     
+   SPIN:
+    begin
+     spin_motor=1;
+    end
+    
+   DONE:
+    begin
+     done=1;
+    end
+    
+   endcase
+  end 
+endmodule
