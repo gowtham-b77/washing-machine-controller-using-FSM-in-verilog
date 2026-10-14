@@ -1,0 +1,72 @@
+module washing_machine_tb;
+
+reg clk, rst, start;
+reg water_fill, wash_done, rinse_done, spin_done;
+
+wire fill_water, wash_motor, rinse_motor, spin_motor, done;
+
+// Instantiate the design
+washing_machine uut (
+    .clk(clk),
+    .rst(rst),
+    .start(start),
+    .water_fill(water_fill),
+    .wash_done(wash_done),
+    .rinse_done(rinse_done),
+    .spin_done(spin_done),
+    .fill_water(fill_water),
+    .wash_motor(wash_motor),
+    .rinse_motor(rinse_motor),
+    .spin_motor(spin_motor),
+    .done(done)
+);
+
+// Clock generation
+always #5 clk = ~clk;
+
+// Test sequence
+initial begin
+    clk = 0;
+    rst = 1;
+    start = 0;
+    water_fill = 0;
+    wash_done = 0;
+    rinse_done = 0;
+    spin_done = 0;
+
+    $monitor("Time=%0t | Fill=%b Wash=%b Rinse=%b Spin=%b Done=%b",
+             $time, fill_water, wash_motor,
+             rinse_motor, spin_motor, done);
+
+    #12 rst = 0;
+
+    @(negedge clk);
+    start = 1;
+    @(negedge clk);
+    start = 0;
+
+    repeat(2) @(negedge clk);
+    water_fill = 1;
+    @(negedge clk);
+    water_fill = 0;
+
+    repeat(2) @(negedge clk);
+    wash_done = 1;
+    @(negedge clk);
+    wash_done = 0;
+
+    repeat(2) @(negedge clk);
+    rinse_done = 1;
+    @(negedge clk);
+    rinse_done = 0;
+
+    repeat(2) @(negedge clk);
+    spin_done = 1;
+    @(negedge clk);
+    spin_done = 0;
+
+    repeat(3) @(negedge clk);
+    $finish;
+end
+
+endmodule
